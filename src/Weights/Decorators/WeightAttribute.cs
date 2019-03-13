@@ -5,7 +5,7 @@ using System.Runtime.CompilerServices;
 
 namespace Weights {
     [AttributeUsage(AttributeTargets.Property)]
-    class WeightAttribute : Attribute {
+    public class WeightAttribute : Attribute {
         public WeightAttribute(double val,[CallerMemberName]string Name=null) {
             this.Weight = new Weight(Name, val);
         }

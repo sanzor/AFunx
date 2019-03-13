@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Reflection;
 using System.Linq;
+using Weights;
+using Extensions;
+
 namespace Example {
     class Program {
         [AttributeUsage(AttributeTargets.Property)]
@@ -20,11 +23,9 @@ namespace Example {
             public double Value { get; set; }
         }
         static void Main(string[] args) {
-            var c = nameof(Attr.S);
-            AttrUser user = new AttrUser();
-            var type = user.GetType();
-            var values = (from prop in type.GetProperties(BindingFlags.DeclaredOnly | BindingFlags.Public | BindingFlags.Instance)
-                        select prop.GetCustomAttribute<Attr>().Val).ToArray();
+            Athlete ath = new Athlete() { Activity = new Run { Distance = 33.3 } };
+            var data=ath.Activity.Extract();
+           
                        
                        
 

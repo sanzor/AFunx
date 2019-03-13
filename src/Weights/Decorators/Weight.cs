@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 
 namespace Weights {
-    class Weight {
+    public class Weight {
         public string Name { get; set; }
         public double Value { get; set; }
         public Weight(string Name,double Value) {

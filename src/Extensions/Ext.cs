@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using Weights;
+
 using System.Reflection;
 using System.Linq;
+using Weights;
 
-namespace WeightTests {
-    static class Ext {
+namespace Extensions {
+    public static class Ext {
 
         public static IReadOnlyList<Weight> Extract(this object o) {
             var type = o.GetType();
@@ -21,7 +22,9 @@ namespace WeightTests {
 
         }
         private static IReadOnlyList<Weight> ExtractWeights(Type type) {
-            var properties = type.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly);
+            var properties = type
+                .GetProperties(BindingFlags.DeclaredOnly);
+                //.Where(x => x.GetCustomAttribute<WeightAttribute>() != null).ToArray() ;
             var weights = properties.Select(x => x.GetCustomAttribute<WeightAttribute>().Weight).ToArray();
             return weights;
         }
