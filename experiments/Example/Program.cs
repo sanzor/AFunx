@@ -5,6 +5,7 @@ using Weights;
 using Extensions;
 using System.Linq.Expressions;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace Example {
     class Program {
@@ -24,9 +25,49 @@ namespace Example {
             [Attr(33)]
             public double Value { get; set; }
         }
+        public class T {
+            public int A { get; set; }
+        }
+        public static long ExtractNormal(T o) {
+            long var = 0;
+            Stopwatch watch = new Stopwatch();
+            watch.Start();
+            var = o.A;
+            watch.Stop();
+            return watch.ElapsedMilliseconds;
+        }
+        public static long ExtractReflexion(T o) {
+            long v = 0;
+            Stopwatch watch = new Stopwatch();
+            Type type = o.GetType();
+            watch.Start();
+           // v=(long)(type.GetProperty("A").GetValue(o);
+            watch.Stop();
+            return watch.ElapsedMilliseconds;
+        }
+        public static double ExtractExp(PropertyInfo o,double weight,object ob) {
+            
+            var rez = (double)o.GetValue(ob) * weight;
+            return rez;
+        }
+        public static Func<PropertyInfo,double,object,double> Extr() {
+            var propinfo = Expression.Parameter(typeof(PropertyInfo), "prop");
+            var weight = Expression.Parameter(typeof(double), "weight");
+            var targetObj = Expression.Parameter(typeof(object), "targetObj");
+            var method = typeof(PropertyInfo).GetMethod("GetValue", new[] { typeof(object) });
+
+            BlockExpression block = Expression.Block(new[] { propinfo, weight, targetObj },
+                Expression.Multiply(
+                    Expression.Convert(
+                        Expression.Call(propinfo, method),
+                        typeof(double)),
+                    weight));
+            var m = Expression.Lambda<Func<PropertyInfo,double,object,double>>(block, new[] { propinfo, weight, targetObj }).Compile();
+            return m;
+        }
 
         static void Main(string[] args) {
-
+            var c = Extr();
             MethodInfo method = typeof(Console).GetMethod("WriteLine", new Type[] { typeof(int) });
             var expr = MakeExpression();
             expr(5);
