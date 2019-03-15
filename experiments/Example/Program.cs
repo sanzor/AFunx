@@ -26,32 +26,51 @@ namespace Example {
         }
 
         static void Main(string[] args) {
-            // Athlete ath = new Athlete() { Activity = new Run { Distance = 33.3 } };
 
-           
-            Run[] act = new Run[] { new Run() { Distance=33}, new Run() { Distance=44} };
-            Run a = act[0];
-            List<Expression> products = new List<Expression>();
+            MethodInfo method = typeof(Console).GetMethod("WriteLine", new Type[] { typeof(int) });
+            var expr = MakeExpression();
+            expr(5);
+        }
+        public static  Func<int,int> MakeExpression() {
+            //input
+            var i = Expression.Parameter(typeof(int), "i");
+            var cnt = Expression.Variable(typeof(int), "cnt");
+            var sum = Expression.Variable(typeof(int), "sum");
+
+            var writeLine = typeof(Console).GetMethod("WriteLine", new[] { typeof(object) });
+
+            var breakLabel = Expression.Label("break");
+            var loop = Expression.Loop(
+                Expression.Block(
+                    Expression.IfThen(
+                        Expression.GreaterThanOrEqual(cnt, i),
+                        Expression.Block(
+                            Expression.Call(writeLine, Expression.Convert(sum, typeof(object))),
+                            Expression.Break(breakLabel))),
+                    Expression.AddAssign(sum, cnt),
+                    Expression.PostIncrementAssign(cnt)),breakLabel);
+            var block = Expression.Block(new[] { cnt, sum },
+                Expression.Assign(cnt, Expression.Constant(0)),
+                Expression.Assign(sum, Expression.Constant(0)),
+                loop,
+                sum);
             
-            ParameterExpression parameter = Expression.Parameter(typeof(Activity));
-            ConstantExpression ct = Expression.Constant(a);
-            Expression variable = Expression.Variable(typeof(double));
-            Expression assign = Expression.Assign(variable, Expression.Constant(0));
-            foreach (var item in ExpTree.propMap) {
-                Expression right = Expression.Property(ct, item.Key);
-                Expression left = Expression.Constant(item.Value);
-                Expression mult = Expression.Multiply(left, right);
-                Expression s = Expression.Add(variable, mult);
-                Expression assign=Expression.Assign(variable)
+            var meth = Expression.Lambda<Func<int, int>>(block,new[] { i }).Compile();
+            return meth;
+        }
+       
+        public static int Print(int i) {
+            int cnt = 0;
+            int sum = 0;
+            while (true) {
+                if (cnt >= i) {
+                    Console.WriteLine(sum);
+                    break;
+                }
+                sum = sum + 1;
+
             }
-           
-            Expression sum=Expression.Loop()
-
-             
-            //ExpTree.GetProduct();
-                       
-                       
-
+            return sum;
         }
     }
 }
